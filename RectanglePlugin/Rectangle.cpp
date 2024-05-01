@@ -1,4 +1,5 @@
 #include "Rectangle.h"
+#include "pch.h"
 
 Rectangle::Rectangle()
 {

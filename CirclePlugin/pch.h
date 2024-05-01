@@ -9,5 +9,8 @@
 
 // Добавьте сюда заголовочные файлы для предварительной компиляции
 #include "framework.h"
+#include <iostream>
+#include "Circle.h"
+#include "Figure.h"
 
 #endif //PCH_H
