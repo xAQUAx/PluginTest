@@ -1,0 +1,4 @@
+LIBRARY HexagonPlugin
+EXPORTS
+	GetPluginFigureName
+	GetPluginFigure
