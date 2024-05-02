@@ -12,5 +12,7 @@
 #include <iostream>
 #include "Rectangle.h"
 #include "Figure.h"
+#include <string>
+#include <memory>
 
 #endif //PCH_H

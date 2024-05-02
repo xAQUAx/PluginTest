@@ -1,7 +1,7 @@
 #include "Rectangle.h"
 #include "pch.h"
 
-Rectangle::Rectangle()
+Rectangl::Rectangl()
 {
 	std::cout << "Side A: ";
 	std::cin >> this->a;
@@ -9,17 +9,17 @@ Rectangle::Rectangle()
 	std::cin >> this->b;
 }
 
-double Rectangle::GetSquare()
+double Rectangl::GetSquare()
 {
 	return a * b;
 }
 
-double Rectangle::GetPerimeter()
+double Rectangl::GetPerimeter()
 {
 	return 2 * a + 2 * b;
 }
 
-std::string Rectangle::GetName()
+std::string Rectangl::GetName()
 {
 	return "Rectangle";
 }

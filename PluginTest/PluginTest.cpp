@@ -1,10 +1,55 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <Windows.h>
+#include <utility>
 
 #include "Figure.h"
-#include "Rectangle.h"
-#include "Circle.h"
+
+typedef std::string(*LPGETPLUGGINFIGURENAME)();
+typedef std::shared_ptr<Figure>(*LPGETPLUGINFIGURE)();
+
+std::wstring DllsPath()
+{
+	TCHAR buffer[MAX_PATH]{ 0 };
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::wstring::size_type pos = std::wstring(buffer).find_last_of(L"\\/");
+	return ((std::wstring(buffer).substr(0, pos)).append(L"\\*.dll"));
+}
+
+std::vector<std::pair<int, HMODULE>> EnumeratePlugins()
+{
+	std::vector<std::pair<int, HMODULE>> result;
+	int index = 1;
+	WIN32_FIND_DATA wfd;
+	HANDLE hSearchHandle;
+
+	std::wstring searchTemplate = DllsPath();
+	hSearchHandle = FindFirstFile(searchTemplate.c_str(), &wfd);
+	if (hSearchHandle == INVALID_HANDLE_VALUE)
+		return result;
+
+	do
+	{
+		HMODULE dll = LoadLibrary(wfd.cFileName);
+		if (dll == NULL)
+			continue;
+
+		if (GetProcAddress(dll, "GetPluginFigureName") != NULL)
+		{
+			result.push_back(std::make_pair(index, dll));
+			index++;
+		}
+		else
+		{
+			FreeLibrary(dll);
+		}
+	} while (FindNextFile(hSearchHandle, &wfd) != 0);
+
+	FindClose(hSearchHandle);
+
+	return result;
+}
 
 int main()
 {
@@ -12,32 +57,53 @@ int main()
 	int num;
 	bool doInput = true;
 
+	std::vector<std::pair<int, HMODULE>> dlls = EnumeratePlugins();
+
 	while (doInput == true)
 	{
+		for (auto pluginInfo : dlls)
+		{
+			LPGETPLUGGINFIGURENAME GetPluginFigureName = (LPGETPLUGGINFIGURENAME)GetProcAddress(pluginInfo.second, "GetPluginFigureName");
+			if (GetPluginFigureName == NULL)
+				continue;
+			std::cout << pluginInfo.first << ". " << GetPluginFigureName() << std::endl;
+		}
+		
 		std::cout << "0. Exit" << std::endl;
-		std::cout << "1. Rectangle" << std::endl;
-		std::cout << "2. Circle" << std::endl;
 
 		std::cin >> num;
-		switch (num)
+
+		if (num == 0)
 		{
-		case 0:
 			doInput = false;
-			break;
-		case 1:
+			continue;
+		}
+
+		HMODULE activeModule = NULL;
+
+		for (auto pluginInfo : dlls)
 		{
-			figures.push_back(std::make_shared<Rectangle>());
-			break;
+			if (pluginInfo.first == num)
+			{
+				activeModule = pluginInfo.second;
+				break;
+			}
 		}
-		case 2:
+
+		if (activeModule == NULL)
 		{
-			figures.push_back(std::make_shared<Circle>());
-			break;
+			std::cout << "Bad Figure number, try again!" << std::endl;
+			continue;
 		}
-		default:
-			std::cout << "Bad Figure number, try again" << std::endl;
-			break;
+
+		LPGETPLUGINFIGURE GetPluginFigure = (LPGETPLUGINFIGURE)GetProcAddress(activeModule, "GetPluginFigure");
+		if (GetPluginFigure == NULL)
+		{
+			std::cout << "Bad plugin, try again!" << std::endl;
+			continue;
 		}
+
+		figures.push_back(GetPluginFigure());
 	}
 
 	for (auto f : figures)
@@ -46,5 +112,11 @@ int main()
 	}
 
 	figures.clear();
+
+	for (auto dll : dlls)
+	{
+		FreeLibrary(dll.second);
+	}
+
 	return 0;
 }

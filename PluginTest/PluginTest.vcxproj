@@ -134,9 +134,7 @@
     <ClCompile Include="PluginTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\Circle.h" />
     <ClInclude Include="..\include\Figure.h" />
-    <ClInclude Include="..\include\Rectangle.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CirclePlugin\CirclePlugin.vcxproj">

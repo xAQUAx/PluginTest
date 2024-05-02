@@ -1,17 +1,19 @@
 #pragma once
 #include "Figure.h"
-class Rectangle :
+
+class Circle :
     public Figure
 {
 private:
-    double a, b;
+    double r;
+    const double pi = 3.14;
 public:
-    Rectangle();
+    Circle();
     virtual double GetSquare();
     virtual double GetPerimeter();
     virtual std::string GetName();
-    virtual ~Rectangle() {
-        std::cout << "Rectangle destructor called!" << std::endl;
+    virtual ~Circle() {
+        std::cout << "Circle destructor called!" << std::endl;
     }
 };
 
